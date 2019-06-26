@@ -10,7 +10,7 @@ public class kafkaproduce {
 
 
     public static void main(String[] args) {
-        for (int i = 1001; i <= 2000; i++) {
+        for (int i = 1; i <= 1000; i++) {
             String mess = " this is kafka message: " + i;
             new KafkaConsumeHighOffset().kafkaProduce(mess);
         }

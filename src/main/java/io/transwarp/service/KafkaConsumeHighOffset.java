@@ -7,10 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.TopicPartition;
 
 import java.util.*;
@@ -73,8 +70,10 @@ public class KafkaConsumeHighOffset {
     }
 
     public void kafkaProduce(String message) {
+        String fsPath = System.getProperty("user.dir") + "/src/main/resources/";
+        System.setProperty("java.security.auth.login.config", fsPath + "kafka_client_jaas.conf");
         Properties props = new Properties();
-        props.put("bootstrap.servers", "192.168.141.128:9092");
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.141.128:9092,192.168.141.129:9092,192.168.141.130:9092");
         props.put("acks", "all");
         props.put("retries", 0);
         props.put("batch.size", 16384);
@@ -82,11 +81,14 @@ public class KafkaConsumeHighOffset {
         props.put("buffer.memory", 33554432);
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        Producer<String, String> procuder = new KafkaProducer<String, String>(props);
+        props.put("security.protocol", "SASL_PLAINTEXT");
+        props.put("sasl.mechanism", "PLAIN");
+        Producer<String, String> producer = new KafkaProducer<String, String>(props);
         ProducerRecord<String, String> msg = new ProducerRecord<String, String>("topic_keywords", message);
-        Future<RecordMetadata> send = procuder.send(msg);
+        Future<RecordMetadata> send = producer.send(msg);
         System.out.println(send);
-        procuder.close();
+        producer.flush();
+        producer.close();
     }
 
     public static void main(String[] args) {
